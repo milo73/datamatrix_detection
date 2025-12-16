@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 PDF Scanner Integration Example
-Shows how to integrate pylibdmtx_optimized.py into your existing PDF scanner
+Shows how to integrate decoder_optimized.py into your existing PDF scanner
 
 Performance Comparison:
   BEFORE: 20-30 seconds per page
@@ -42,7 +42,7 @@ def detect_codes_in_top_right_corner_OLD(image, corner_size_ratio=0.2, decode=Tr
 # AFTER - Optimized Version (10x faster)
 def detect_codes_in_top_right_corner_NEW(image, corner_size_ratio=0.2, decode=True):
     """Optimized function - 2-3 seconds per page"""
-    from pylibdmtx_optimized import decode_with_roi
+    from decoder_optimized import decode_with_roi
     
     # Single optimized call handles everything
     codes = decode_with_roi(
@@ -70,7 +70,7 @@ def detect_codes_OPTIMIZED(image, corner_size_ratio=0.2, decode=True, debug=Fals
     """
     import cv2
     import numpy as np
-    from pylibdmtx_optimized import decode_with_roi, decode_adaptive
+    from decoder_optimized import decode_with_roi, decode_adaptive
     
     detected_codes = []
     
@@ -120,7 +120,7 @@ def analyze_pdf_OPTIMIZED(pdf_path, verbose=True, dpi=300, corner_size_ratio=0.2
     """
     import fitz
     from concurrent.futures import ThreadPoolExecutor, as_completed
-    from pylibdmtx_optimized import decode_pdf_corner, get_cache_stats, clear_cache
+    from decoder_optimized import decode_pdf_corner, get_cache_stats, clear_cache
     import time
     
     # Clear cache at start of new PDF
@@ -210,7 +210,7 @@ def process_single_page(pdf_document, page_num, dpi, corner_size_ratio):
     import fitz
     import cv2
     import numpy as np
-    from pylibdmtx_optimized import decode_pdf_corner
+    from decoder_optimized import decode_pdf_corner
     
     # Extract page as image
     page = pdf_document[page_num]
@@ -237,12 +237,12 @@ def benchmark_comparison(test_image_path, iterations=5):
     Compare original vs optimized performance
     
     Usage:
-        python pdf_scanner_integration.py --benchmark test.png
+        python integration_examples.py --benchmark test.png
     """
     import time
     from PIL import Image
     from pylibdmtx import pylibdmtx
-    from pylibdmtx_optimized import decode_fast, decode_with_roi, decode_pdf_corner
+    from decoder_optimized import decode_fast, decode_with_roi, decode_pdf_corner
     
     print("Performance Benchmark")
     print("="*70)
@@ -326,10 +326,10 @@ def integrate_into_existing_script():
     Example showing minimal changes to your existing script
     """
     print("""
-# YOUR EXISTING SCRIPT: pdf_qr_detector.py
+# YOUR EXISTING SCRIPT: detector.py
 # Just add these imports at the top:
 
-from pylibdmtx_optimized import decode_pdf_corner, decode_with_roi
+from decoder_optimized import decode_pdf_corner, decode_with_roi
 
 # Then replace this function:
 def detect_codes_in_top_right_corner(image, corner_size_ratio=0.2, decode=True):
@@ -349,7 +349,7 @@ def detect_codes_in_corner(image, corner_size_ratio=0.2, decode=True):
 
 # With:
 def detect_codes_in_corner(image, corner_size_ratio=0.2, decode=True):
-    from pylibdmtx_optimized import decode_with_roi
+    from decoder_optimized import decode_with_roi
     return decode_with_roi(
         image,
         corner='top_right',
@@ -366,7 +366,7 @@ if __name__ == '__main__':
     
     print("PDF Scanner Integration Guide")
     print("="*70)
-    print("\nThis script shows how to integrate pylibdmtx_optimized.py")
+    print("\nThis script shows how to integrate decoder_optimized.py")
     print("into your existing PDF scanner scripts for 10x performance.\n")
     
     if len(sys.argv) > 1:
@@ -379,21 +379,21 @@ if __name__ == '__main__':
                     print(f"✗ Error: File not found: {image_path}")
                     print("\nOptions:")
                     print("  1. Create a test image first:")
-                    print("     python create_test_image.py")
+                    print("     python test_image_generator.py")
                     print("\n  2. Use an existing image:")
                     print(f"     python {sys.argv[0]} --benchmark your_image.png")
                     print("\n  3. Extract from your PDF:")
-                    print("     python create_test_image.py your_invoice.pdf")
+                    print("     python test_image_generator.py your_invoice.pdf")
                     sys.exit(1)
                 
                 # Run benchmark
                 benchmark_comparison(image_path)
             else:
-                print("✗ Usage: python pdf_scanner_integration.py --benchmark <image_path>")
+                print("✗ Usage: python integration_examples.py --benchmark <image_path>")
                 print("\nFirst create a test image:")
-                print("  python create_test_image.py")
+                print("  python test_image_generator.py")
                 print("\nThen run benchmark:")
-                print("  python pdf_scanner_integration.py --benchmark test.png")
+                print("  python integration_examples.py --benchmark test.png")
                 
         elif sys.argv[1] == '--integrate':
             integrate_into_existing_script()
@@ -405,6 +405,6 @@ if __name__ == '__main__':
         print("  --integrate              : Show integration examples")
         print("\nQuick Start:")
         print("  1. Create test image:")
-        print("     python create_test_image.py")
+        print("     python test_image_generator.py")
         print("\n  2. Run benchmark:")
-        print("     python pdf_scanner_integration.py --benchmark test.png")
+        print("     python integration_examples.py --benchmark test.png")

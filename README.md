@@ -54,45 +54,86 @@ sudo apt-get install libzbar0
 
 #### macOS
 ```bash
-# Using Homebrew
+# Using Homebrew (install Homebrew first from https://brew.sh if needed)
 brew install libdmtx
 brew install zbar
+
+# Verify installation
+brew list libdmtx
+brew list zbar
 ```
 
-#### Windows
-1. **For pylibdmtx**: 
-   - Download pre-built wheels from [GitHub](https://github.com/NaturalHistoryMuseum/pylibdmtx#windows)
-   - Or use Anaconda: `conda install -c conda-forge pylibdmtx`
+**macOS Troubleshooting**:
+- If `brew install` fails, try `brew update && brew upgrade` first
+- For M1/M2 Macs, Homebrew installs to `/opt/homebrew/`. You may need to add to PATH:
+  ```bash
+  export PATH="/opt/homebrew/bin:$PATH"
+  ```
+- If Python can't find the libraries, try:
+  ```bash
+  export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
+  ```
 
-2. **For pyzbar**:
-   - Download Visual C++ Redistributable from Microsoft
-   - Install pyzbar: `pip install pyzbar`
+#### Windows
+
+**Option 1: Using pip (Recommended)**
+```cmd
+# Install Python libraries (includes pre-built binaries for Windows)
+pip install pylibdmtx pyzbar PyMuPDF opencv-python numpy
+```
+
+**Option 2: Using Conda/Anaconda**
+```cmd
+conda install -c conda-forge pylibdmtx pyzbar
+pip install PyMuPDF opencv-python
+```
+
+**Windows Troubleshooting**:
+
+1. **If pylibdmtx fails to import**:
+   - The pip package includes pre-built DLLs for Windows
+   - If you get "DLL not found" errors, install Visual C++ Redistributable:
+     - [Visual C++ 2015-2022 Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+
+2. **If pyzbar fails to import**:
+   - pyzbar requires `libzbar-64.dll` which is bundled with the pip package
+   - If missing, install Visual C++ 2013 Redistributable:
+     - [Visual C++ 2013 Redistributable](https://aka.ms/highdpimfc2013x64enu)
+
+3. **For 32-bit Python on Windows**:
+   ```cmd
+   pip install pylibdmtx[win32]
+   ```
+
+4. **Manual DLL installation** (if automatic fails):
+   - Download `libdmtx.dll` from [libdmtx releases](https://github.com/dmtx/libdmtx/releases)
+   - Place in your Python's `Scripts` folder or add to system PATH
 
 ## 🚀 Quick Start
 
 ### Basic Usage
 ```bash
 # Analyze a PDF with default settings
-python pdf_qr_detector.py document.pdf
+python detector.py document.pdf
 
 # Fast detection-only mode (doesn't decode content)
-python pdf_qr_detector.py document.pdf --detect-only
+python detector.py document.pdf --detect-only
 
 # Process all odd pages (skip white page detection)
-python pdf_qr_detector.py document.pdf --skip-white
+python detector.py document.pdf --skip-white
 ```
 
 ### For Problem PDFs
 ```bash
 # Maximum detection capability
-python pdf_qr_detector.py document.pdf 500 0.15 --skip-white --debug
+python detector.py document.pdf 500 0.15 --skip-white --debug
 ```
 
 ## 📘 Usage
 
 ### Basic Syntax
 ```bash
-python pdf_qr_detector.py <pdf_file> [dpi] [corner_ratio] [options]
+python detector.py <pdf_file> [dpi] [corner_ratio] [options]
 ```
 
 ### Positional Arguments
@@ -119,14 +160,14 @@ python pdf_qr_detector.py <pdf_file> [dpi] [corner_ratio] [options]
 #### 1. Full Decode Mode (Default)
 Detects and decodes the content of all codes.
 ```bash
-python pdf_qr_detector.py invoice.pdf
+python detector.py invoice.pdf
 ```
 **Use when**: You need to read the actual values in the codes
 
 #### 2. Detection-Only Mode
 Faster scanning that only verifies code presence.
 ```bash
-python pdf_qr_detector.py invoice.pdf --detect-only
+python detector.py invoice.pdf --detect-only
 ```
 **Use when**: You only need to find which pages are missing codes
 
@@ -137,13 +178,13 @@ Higher DPI improves detection of small codes but increases processing time.
 
 ```bash
 # Standard (default)
-python pdf_qr_detector.py file.pdf 300
+python detector.py file.pdf 300
 
 # High quality for small codes
-python pdf_qr_detector.py file.pdf 400
+python detector.py file.pdf 400
 
 # Maximum quality for very small DataMatrix
-python pdf_qr_detector.py file.pdf 600
+python detector.py file.pdf 600
 ```
 
 **Recommendations**:
@@ -156,26 +197,26 @@ Defines what percentage of the page to scan in the top-right corner.
 
 ```bash
 # Scan 20% of page (default)
-python pdf_qr_detector.py file.pdf 300 0.2
+python detector.py file.pdf 300 0.2
 
 # Scan smaller region (10%) for codes very close to corner
-python pdf_qr_detector.py file.pdf 300 0.1
+python detector.py file.pdf 300 0.1
 
 # Scan larger region (30%) for codes further from corner
-python pdf_qr_detector.py file.pdf 300 0.3
+python detector.py file.pdf 300 0.3
 ```
 
 ### Page Processing Options
 
 #### Skip White Page Detection
 ```bash
-python pdf_qr_detector.py file.pdf --skip-white
+python detector.py file.pdf --skip-white
 ```
 **Use when**: Pages with small codes are incorrectly detected as blank
 
 #### Debug Mode
 ```bash
-python pdf_qr_detector.py file.pdf --debug
+python detector.py file.pdf --debug
 ```
 Shows:
 - Detailed detection attempts
@@ -186,7 +227,7 @@ Shows:
 #### Extract Corners for Analysis
 ```bash
 # Extract corners from specific pages
-python pdf_qr_detector.py file.pdf --extract-corners 377,379,381
+python detector.py file.pdf --extract-corners 377,379,381
 
 # This creates a debug_corners/ folder with:
 # - page_377_corner_original.png
@@ -273,19 +314,19 @@ DECODED VALUES:
 1. **For Initial Scanning**:
    ```bash
    # Fast scan to identify problem pages
-   python pdf_qr_detector.py file.pdf --detect-only --skip-white
+   python detector.py file.pdf --detect-only --skip-white
    ```
 
 2. **For Problem Pages**:
    ```bash
    # Intensive scan on specific extracted corners
-   python pdf_qr_detector.py file.pdf --extract-corners 377,379
+   python detector.py file.pdf --extract-corners 377,379
    ```
 
 3. **For Production Use**:
    ```bash
    # Balance of speed and accuracy
-   python pdf_qr_detector.py file.pdf 400 0.15 --skip-white
+   python detector.py file.pdf 400 0.15 --skip-white
    ```
 
 ## 🔧 Troubleshooting
@@ -304,30 +345,30 @@ pip install pylibdmtx
 #### 2. Increase DPI
 ```bash
 # Try progressively higher DPI
-python pdf_qr_detector.py file.pdf 400
-python pdf_qr_detector.py file.pdf 500
-python pdf_qr_detector.py file.pdf 600
+python detector.py file.pdf 400
+python detector.py file.pdf 500
+python detector.py file.pdf 600
 ```
 
 #### 3. Adjust Corner Size
 ```bash
 # Smaller region if code is very close to corner
-python pdf_qr_detector.py file.pdf 400 0.1
+python detector.py file.pdf 400 0.1
 
 # Larger region if code is further from corner
-python pdf_qr_detector.py file.pdf 400 0.3
+python detector.py file.pdf 400 0.3
 ```
 
 #### 4. Skip White Page Detection
 ```bash
 # If pages are incorrectly marked as blank
-python pdf_qr_detector.py file.pdf --skip-white
+python detector.py file.pdf --skip-white
 ```
 
 #### 5. Debug Specific Pages
 ```bash
 # Extract and examine problem pages
-python pdf_qr_detector.py file.pdf --extract-corners 377,379
+python detector.py file.pdf --extract-corners 377,379
 
 # Check the debug_corners/ folder
 ls debug_corners/
@@ -339,7 +380,7 @@ ls debug_corners/
 
 **Solution**:
 ```bash
-python pdf_qr_detector.py file.pdf --skip-white
+python detector.py file.pdf --skip-white
 ```
 
 ### Detection Works but Decoding Fails
@@ -376,7 +417,7 @@ brew install libdmtx
 **Solutions**:
 ```bash
 # Use detection-only mode
-python pdf_qr_detector.py file.pdf --detect-only
+python detector.py file.pdf --detect-only
 
 # Process specific page range by extracting PDF pages first
 # Using pymupdf or other PDF tools
@@ -397,28 +438,28 @@ start_x = 0  # Top-left
 ### Example 1: Standard Invoice Processing
 ```bash
 # Typical invoice with QR codes in top-right
-python pdf_qr_detector.py invoice.pdf
+python detector.py invoice.pdf
 ```
 
 ### Example 2: Document with Small DataMatrix Codes
 ```bash
 # Small DataMatrix codes requiring high DPI
-python pdf_qr_detector.py document.pdf 500 0.15 --skip-white
+python detector.py document.pdf 500 0.15 --skip-white
 ```
 
 ### Example 3: Quick Validation Check
 ```bash
 # Fast check to find missing codes
-python pdf_qr_detector.py batch_scan.pdf --detect-only
+python detector.py batch_scan.pdf --detect-only
 ```
 
 ### Example 4: Debugging Specific Pages
 ```bash
 # When pages 377 and 379 are reported as missing codes
-python pdf_qr_detector.py document.pdf --extract-corners 377,379
+python detector.py document.pdf --extract-corners 377,379
 
 # Then try with higher DPI
-python pdf_qr_detector.py document.pdf 600 0.1 --debug
+python detector.py document.pdf 600 0.1 --debug
 ```
 
 ### Example 5: Processing Multiple PDFs
@@ -427,7 +468,7 @@ python pdf_qr_detector.py document.pdf 600 0.1 --debug
 # Batch processing script
 for pdf in *.pdf; do
     echo "Processing $pdf..."
-    python pdf_qr_detector.py "$pdf" --detect-only --skip-white
+    python detector.py "$pdf" --detect-only --skip-white
 done
 ```
 
@@ -464,15 +505,21 @@ done
 
 ```
 project/
-├── pdf_qr_detector.py      # Main script
-├── README.md               # This file
-├── requirements.txt        # Python dependencies
-├── debug_corners/         # Created when using --extract-corners
+├── detector.py                 # Main single-file detector
+├── detector_batch.py           # Batch processing for multiple PDFs
+├── decoder_optimized.py        # Performance-optimized decoder functions
+├── integration_examples.py     # Integration examples and benchmarks
+├── test_image_generator.py     # Create test images for benchmarking
+├── fix_python313.py            # Python 3.13 compatibility fix
+├── fix_quick.py                # Quick installation fix script
+├── README.md                   # This file
+├── BATCH_README.md             # Batch processing documentation
+├── debug_corners/              # Created when using --extract-corners
 │   ├── page_377_corner_original.png
 │   ├── page_377_corner_enhanced.png
 │   ├── page_377_corner_binary.png
 │   └── page_377_corner_inverted.png
-└── test_pdfs/            # Your PDF files
+└── test_pdfs/                  # Your PDF files
     └── document.pdf
 ```
 

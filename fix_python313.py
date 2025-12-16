@@ -23,7 +23,7 @@ Run this in your terminal:
 
 That's it! setuptools includes a distutils backport for Python 3.12+.
 Then re-run your benchmark:
-    python pdf_scanner_integration.py --benchmark test.png
+    python integration_examples.py --benchmark test.png
 
 This is the easiest temporary fix while we wait for upstream to update.
 """
@@ -63,7 +63,7 @@ Step 5: Install packaging if needed:
     pip install packaging
 
 Step 6: Save and test:
-    python pdf_scanner_integration.py --benchmark test.png
+    python integration_examples.py --benchmark test.png
 """
 
 # ============================================================================
@@ -274,7 +274,7 @@ def main():
         print("SUCCESS! pylibdmtx is now Python 3.13 compatible")
         print("="*70)
         print("\nYou can now run:")
-        print("  python pdf_scanner_integration.py --benchmark test.png")
+        print("  python integration_examples.py --benchmark test.png")
     else:
         print("\n" + "="*70)
         print("PARTIAL SUCCESS - Patched but verification failed")
@@ -313,7 +313,7 @@ So the patcher above is probably easier for your existing scripts.
 HOW TO USE THIS PATCHER:
 
 Option A - Run the automated patcher:
-    python pylibdmtx_py313_fix.py
+    python fix_python313.py
 
 Option B - Quick fix (recommended):
     pip install setuptools
@@ -326,5 +326,5 @@ Option C - Manual patch:
     4. Save and test
 
 After applying ANY of these fixes, you should be able to run:
-    python pdf_scanner_integration.py --benchmark test.png
+    python integration_examples.py --benchmark test.png
 """

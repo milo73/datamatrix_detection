@@ -7,9 +7,9 @@ Generates test images with DataMatrix codes for benchmarking.
 Run this first, then run the benchmark.
 
 Usage:
-    python create_test_image.py                    # Creates test.png
-    python create_test_image.py custom_name.png    # Custom filename
-    python create_test_image.py --multiple         # Create multiple test images
+    python test_image_generator.py                    # Creates test.png
+    python test_image_generator.py custom_name.png    # Custom filename
+    python test_image_generator.py --multiple         # Create multiple test images
 """
 
 import sys
@@ -88,7 +88,7 @@ def create_test_suite():
     if created:
         print("\nYou can now run benchmarks:")
         for img in created:
-            print(f"  python pdf_scanner_integration.py --benchmark {img}")
+            print(f"  python integration_examples.py --benchmark {img}")
     
     return created
 
@@ -219,13 +219,13 @@ def main():
             result = extract_from_pdf_for_testing(arg, page_num, output)
             if result:
                 print(f"\nYou can now benchmark with:")
-                print(f"  python pdf_scanner_integration.py --benchmark {result}")
+                print(f"  python integration_examples.py --benchmark {result}")
                 
         elif arg.endswith('.png') or arg.endswith('.jpg'):
             # Custom filename
             create_test_image(arg)
             print(f"\nYou can now benchmark with:")
-            print(f"  python pdf_scanner_integration.py --benchmark {arg}")
+            print(f"  python integration_examples.py --benchmark {arg}")
             
         else:
             print(f"Unknown option: {arg}")
@@ -239,35 +239,35 @@ def main():
             print(f"\nNext steps:")
             print(f"  1. View the image: test.png")
             print(f"  2. Run benchmark:")
-            print(f"     python pdf_scanner_integration.py --benchmark test.png")
+            print(f"     python integration_examples.py --benchmark test.png")
             print(f"\nOr create more test images:")
-            print(f"  python create_test_image.py --multiple")
-            print(f"  python create_test_image.py --document")
+            print(f"  python test_image_generator.py --multiple")
+            print(f"  python test_image_generator.py --document")
 
 
 def print_usage():
     """Print usage information"""
     print("""
 Usage:
-  python create_test_image.py                    # Create test.png
-  python create_test_image.py mytest.png         # Custom filename
-  python create_test_image.py --multiple         # Create multiple test images
-  python create_test_image.py --document         # Create document corner simulation
-  python create_test_image.py input.pdf          # Extract page from PDF
-  python create_test_image.py input.pdf 5        # Extract page 6 from PDF
+  python test_image_generator.py                    # Create test.png
+  python test_image_generator.py mytest.png         # Custom filename
+  python test_image_generator.py --multiple         # Create multiple test images
+  python test_image_generator.py --document         # Create document corner simulation
+  python test_image_generator.py input.pdf          # Extract page from PDF
+  python test_image_generator.py input.pdf 5        # Extract page 6 from PDF
 
 Examples:
   # Quick start
-  python create_test_image.py
-  python pdf_scanner_integration.py --benchmark test.png
+  python test_image_generator.py
+  python integration_examples.py --benchmark test.png
   
   # Test with document corner simulation
-  python create_test_image.py --document
-  python pdf_scanner_integration.py --benchmark test_document_corner.png
+  python test_image_generator.py --document
+  python integration_examples.py --benchmark test_document_corner.png
   
   # Extract from your actual PDF
-  python create_test_image.py your_invoice.pdf 0
-  python pdf_scanner_integration.py --benchmark test_from_pdf.png
+  python test_image_generator.py your_invoice.pdf 0
+  python integration_examples.py --benchmark test_from_pdf.png
     """)
 
 
