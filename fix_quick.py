@@ -4,7 +4,7 @@ Quick Fix for pylibdmtx on Python 3.13
 ======================================
 
 This script automatically fixes the distutils import error.
-Just run: python quick_fix.py
+Just run: python fix_quick.py
 
 It will:
 1. Install required dependencies
@@ -68,7 +68,7 @@ def quick_fix():
         
         print("\n" + "="*70)
         print("SUCCESS! You can now run your benchmark:")
-        print("  python pdf_scanner_integration.py --benchmark test.png")
+        print("  python integration_examples.py --benchmark test.png")
         print("="*70)
         return True
         
@@ -139,7 +139,7 @@ except ImportError:
         print(f"✗ Advanced patch failed: {e}")
         print("\nManual fix required:")
         print("1. Run: pip install setuptools")
-        print("2. Or see: pylibdmtx_py313_fix.py for detailed instructions")
+        print("2. Or see: fix_python313.py for detailed instructions")
         return False
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-pylibdmtx_optimized.py - Performance-Enhanced DataMatrix Decoder
+decoder_optimized.py - Performance-Enhanced DataMatrix Decoder
 
 Drop-in replacement for pylibdmtx.decode() with 5-15x performance improvements.
 
@@ -14,7 +14,7 @@ Features:
 - Zero-copy operations where possible
 
 Usage:
-    from pylibdmtx_optimized import decode_fast, decode_with_roi
+    from decoder_optimized import decode_fast, decode_with_roi
     
     # Fast decode (5x faster)
     results = decode_fast(image, quick_scan=True)
@@ -344,7 +344,7 @@ def decode_fast(
         >>> results = decode_fast(img, quick_scan=False)
         >>> 
         >>> # Check cache stats
-        >>> from pylibdmtx_optimized import get_cache_stats
+        >>> from decoder_optimized import get_cache_stats
         >>> print(get_cache_stats())
     """
     if not PYLIBDMTX_AVAILABLE:
@@ -520,7 +520,7 @@ def decode_pdf_corner(
 
 if __name__ == '__main__':
     # Example usage
-    print("pylibdmtx_optimized - Performance-Enhanced DataMatrix Decoder")
+    print("decoder_optimized - Performance-Enhanced DataMatrix Decoder")
     print("=" * 60)
     
     if not PYLIBDMTX_AVAILABLE:
@@ -535,29 +535,29 @@ if __name__ == '__main__':
     print("-" * 60)
     print("""
 # 1. Fast decode (5-10x faster)
-from pylibdmtx_optimized import decode_fast
+from decoder_optimized import decode_fast
 from PIL import Image
 
 img = Image.open('datamatrix.png')
 results = decode_fast(img, quick_scan=True, shrink=2)
 
 # 2. ROI decode for corner scanning (10x faster)
-from pylibdmtx_optimized import decode_with_roi
+from decoder_optimized import decode_with_roi
 
 results = decode_with_roi(img, corner='top_right', corner_ratio=0.2)
 
 # 3. PDF corner optimization (15x faster for your use case)
-from pylibdmtx_optimized import decode_pdf_corner
+from decoder_optimized import decode_pdf_corner
 
 results = decode_pdf_corner(page_image)
 
 # 4. Adaptive decode (tries fast first, falls back to thorough)
-from pylibdmtx_optimized import decode_adaptive
+from decoder_optimized import decode_adaptive
 
 results = decode_adaptive(img, timeout_budget=5000)
 
 # 5. Check cache performance
-from pylibdmtx_optimized import get_cache_stats
+from decoder_optimized import get_cache_stats
 
 stats = get_cache_stats()
 print(f"Cache hit rate: {stats['hit_rate']}")

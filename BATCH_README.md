@@ -6,16 +6,16 @@ A powerful batch processing tool for detecting QR codes and DataMatrix codes acr
 
 ```bash
 # Process all PDFs in current folder
-python batch_detector.py .
+python detector_batch.py .
 
 # Process specific folder
-python batch_detector.py /path/to/invoices
+python detector_batch.py /path/to/invoices
 
 # Fast detection mode (no decoding)
-python batch_detector.py . --detect-only
+python detector_batch.py . --detect-only
 
 # Process all subfolders
-python batch_detector.py . --recursive
+python detector_batch.py . --recursive
 ```
 
 ## 📋 Features
@@ -41,21 +41,44 @@ python batch_detector.py . --recursive
 
 ## 📦 Installation
 
+### Python Libraries
 ```bash
-# Install required libraries
 pip install pylibdmtx pyzbar PyMuPDF opencv-python numpy
+```
 
-# Install system dependencies (Ubuntu/Debian)
+### System Dependencies
+
+#### Ubuntu/Debian
+```bash
+sudo apt-get update
 sudo apt-get install libdmtx0b libzbar0
+```
 
-# macOS
+#### macOS
+```bash
+# Using Homebrew (install from https://brew.sh if needed)
 brew install libdmtx zbar
 ```
+
+**macOS Notes**:
+- For M1/M2/M3 Macs, ensure Homebrew is in PATH: `export PATH="/opt/homebrew/bin:$PATH"`
+- If Python can't find libraries: `export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"`
+
+#### Windows
+```cmd
+# pip includes pre-built Windows binaries
+pip install pylibdmtx pyzbar PyMuPDF opencv-python numpy
+```
+
+**Windows Notes**:
+- If you get DLL errors, install [Visual C++ 2015-2022 Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+- For pyzbar DLL issues, install [Visual C++ 2013 Redistributable](https://aka.ms/highdpimfc2013x64enu)
+- Alternative: Use Anaconda: `conda install -c conda-forge pylibdmtx pyzbar`
 
 ## 🎯 Command Line Arguments
 
 ```bash
-python batch_detector.py <folder> [options]
+python detector_batch.py <folder> [options]
 ```
 
 ### Required Argument
@@ -139,7 +162,7 @@ Contains both summary and detailed results for all files.
 
 ### Example 1: Process Invoices Folder
 ```bash
-python batch_detector.py ~/Documents/Invoices --dpi 400
+python detector_batch.py ~/Documents/Invoices --dpi 400
 ```
 Output:
 ```
@@ -155,18 +178,18 @@ BATCH PROCESSING: 152 PDF files
 
 ### Example 2: Quick Validation Check
 ```bash
-python batch_detector.py . --detect-only --recursive
+python detector_batch.py . --detect-only --recursive
 ```
 Fast detection-only mode for all PDFs in current folder and subfolders.
 
 ### Example 3: High-Quality Scan with Custom Output
 ```bash
-python batch_detector.py /scans --dpi 500 --corner-size 0.15 --output /reports/scan_results
+python detector_batch.py /scans --dpi 500 --corner-size 0.15 --output /reports/scan_results
 ```
 
 ### Example 4: Process Specific File Pattern
 ```bash
-python batch_detector.py . --pattern "invoice_2024*.pdf" --skip-white
+python detector_batch.py . --pattern "invoice_2024*.pdf" --skip-white
 ```
 
 ## 📈 Performance Optimization
@@ -184,23 +207,23 @@ python batch_detector.py . --pattern "invoice_2024*.pdf" --skip-white
 
 1. **Start with Detection-Only**:
    ```bash
-   python batch_detector.py large_folder --detect-only
+   python detector_batch.py large_folder --detect-only
    ```
    Quickly identify files with missing codes.
 
 2. **Process Problem Files Separately**:
    ```bash
    # After identifying problem files, process them with higher quality
-   python batch_detector.py problem_files --dpi 500 --skip-white
+   python detector_batch.py problem_files --dpi 500 --skip-white
    ```
 
 3. **Use Recursive Carefully**:
    ```bash
    # Test on one subfolder first
-   python batch_detector.py subfolder --detect-only
+   python detector_batch.py subfolder --detect-only
    
    # Then process all
-   python batch_detector.py . --recursive
+   python detector_batch.py . --recursive
    ```
 
 ## 🔍 Understanding the Console Output
@@ -290,31 +313,31 @@ df.to_excel('analysis.xlsx', index=False)
 ls *.pdf
 
 # Use recursive if PDFs are in subfolders
-python batch_detector.py . --recursive
+python detector_batch.py . --recursive
 
 # Check pattern matching
-python batch_detector.py . --pattern "*.PDF"
+python detector_batch.py . --pattern "*.PDF"
 ```
 
 ### Issue: Processing is too slow
 ```bash
 # Use detection-only mode
-python batch_detector.py folder --detect-only
+python detector_batch.py folder --detect-only
 
 # Reduce DPI for initial scan
-python batch_detector.py folder --dpi 200 --detect-only
+python detector_batch.py folder --dpi 200 --detect-only
 ```
 
 ### Issue: Missing codes on known good files
 ```bash
 # Skip white page detection
-python batch_detector.py folder --skip-white
+python detector_batch.py folder --skip-white
 
 # Increase DPI
-python batch_detector.py folder --dpi 500
+python detector_batch.py folder --dpi 500
 
 # Adjust corner size
-python batch_detector.py folder --corner-size 0.3
+python detector_batch.py folder --corner-size 0.3
 ```
 
 ## 📊 Analyzing Results
@@ -350,7 +373,7 @@ The script returns different exit codes:
 Use in shell scripts:
 ```bash
 #!/bin/bash
-if python batch_detector.py folder --detect-only; then
+if python detector_batch.py folder --detect-only; then
     echo "All codes detected!"
 else
     echo "Some codes missing, check reports"
