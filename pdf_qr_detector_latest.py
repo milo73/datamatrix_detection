@@ -8,11 +8,16 @@ Supports detection-only mode for faster performance.
 
 import sys
 import os
+import logging
+from typing import Dict, List, Optional, Any
 import fitz  # PyMuPDF
 import cv2
 import numpy as np
 from pathlib import Path
 from collections import Counter
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Try to import both libraries
 try:
@@ -86,16 +91,17 @@ def sharpen_image(gray_image):
                        [-1, -1, -1]])
     return cv2.filter2D(gray_image, -1, kernel)
 
-def detect_datamatrix_with_pylibdmtx(gray_roi, decode=True, timeout=1000, max_count=5):
+def detect_datamatrix_with_pylibdmtx(gray_roi: np.ndarray, decode: bool = True,
+                                      timeout: int = 1000, max_count: int = 5) -> List[Dict[str, Any]]:
     """
     Detect DataMatrix codes using pylibdmtx.
-    
+
     Args:
         gray_roi: Grayscale image region
         decode: If True, decode the content. If False, only detect presence
         timeout: Timeout in milliseconds for detection
         max_count: Maximum number of codes to detect
-    
+
     Returns:
         List of detected codes with format, data, and position
     """
@@ -116,12 +122,12 @@ def detect_datamatrix_with_pylibdmtx(gray_roi, decode=True, timeout=1000, max_co
         for code in codes:
             # Extract position
             x, y, w, h = code.rect
-            
+
             # Get data if decoding
             if decode:
                 try:
                     decoded_data = code.data.decode('utf-8')
-                except:
+                except (UnicodeDecodeError, AttributeError):
                     decoded_data = str(code.data)
             else:
                 decoded_data = "DATAMATRIX_DETECTED_NOT_DECODED"
@@ -134,19 +140,18 @@ def detect_datamatrix_with_pylibdmtx(gray_roi, decode=True, timeout=1000, max_co
             })
             
     except Exception as e:
-        # Silent fail - detection didn't work
-        pass
-    
+        logger.debug(f"pylibdmtx detection failed: {e}")
+
     return detected
 
-def detect_codes_with_pyzbar(gray_roi, decode=True):
+def detect_codes_with_pyzbar(gray_roi: np.ndarray, decode: bool = True) -> List[Dict[str, Any]]:
     """
     Detect codes using pyzbar (QR codes and DataMatrix).
-    
+
     Args:
         gray_roi: Grayscale image region
         decode: If True, decode the content
-    
+
     Returns:
         List of detected codes
     """
@@ -163,7 +168,7 @@ def detect_codes_with_pyzbar(gray_roi, decode=True):
             if decode:
                 try:
                     decoded_data = code.data.decode('utf-8')
-                except:
+                except (UnicodeDecodeError, AttributeError):
                     decoded_data = str(code.data)
             else:
                 decoded_data = f"{code.type}_DETECTED_NOT_DECODED"
@@ -175,26 +180,38 @@ def detect_codes_with_pyzbar(gray_roi, decode=True):
                 'method': 'pyzbar'
             })
             
-    except Exception:
-        pass
-    
+    except Exception as e:
+        logger.debug(f"pyzbar detection failed: {e}")
+
     return detected
 
-def detect_codes_in_top_right_corner(image, corner_size_ratio=0.2, decode=True, debug=False):
+def detect_codes_in_top_right_corner(image: np.ndarray, corner_size_ratio: float = 0.2,
+                                      decode: bool = True, debug: bool = False) -> List[Dict[str, Any]]:
     """
     Focus detection specifically on the top-right corner where codes are expected.
     Enhanced with pylibdmtx for DataMatrix detection.
-    
+
     Args:
         image: OpenCV image array
         corner_size_ratio: Ratio of image dimensions to use for corner (default 0.2 = 20%)
         decode: If True, decode the content. If False, only detect presence
         debug: If True, save debug images
-    
+
     Returns:
-        List of detected codes
+        List of detected codes (empty list if none found or on error)
     """
     detected_codes = []
+
+    # Validate image input
+    if image is None or not hasattr(image, 'shape') or len(image.shape) < 2:
+        logger.warning("Invalid image input: image is None or has invalid shape")
+        return detected_codes
+
+    # Validate corner_size_ratio
+    if not 0 < corner_size_ratio <= 0.5:
+        logger.warning(f"corner_size_ratio {corner_size_ratio} outside valid range (0, 0.5], using default 0.2")
+        corner_size_ratio = 0.2
+
     h, w = image.shape[:2] if len(image.shape) == 3 else image.shape
     
     # Define top-right corner region
@@ -402,11 +419,12 @@ def validate_code_content(content, code_type='UNKNOWN'):
     # Default for any other text
     return f"Text content ({len(content)} chars)"
 
-def analyze_pdf_for_codes(pdf_path, verbose=True, dpi=300, corner_size_ratio=0.2, 
-                          decode=True, debug=False, skip_white_check=False):
+def analyze_pdf_for_codes(pdf_path: str, verbose: bool = True, dpi: int = 300,
+                          corner_size_ratio: float = 0.2, decode: bool = True,
+                          debug: bool = False, skip_white_check: bool = False) -> Optional[Dict[str, Any]]:
     """
     Analyze PDF for QR codes and DataMatrix codes in top-right corner of odd pages.
-    
+
     Args:
         pdf_path: Path to the PDF file
         verbose: Print detailed information for each page
@@ -415,10 +433,23 @@ def analyze_pdf_for_codes(pdf_path, verbose=True, dpi=300, corner_size_ratio=0.2
         decode: If True, decode content. If False, only detect presence
         debug: Save debug images and show extra information
         skip_white_check: Skip white page detection (process all odd pages)
-    
+
     Returns:
-        Dictionary with results
+        Dictionary with results, or None on error
     """
+    # Validate DPI
+    if dpi < 72:
+        logger.warning(f"DPI {dpi} is very low, using minimum of 72")
+        dpi = 72
+    elif dpi > 1200:
+        logger.warning(f"DPI {dpi} is very high (may cause memory issues), capping at 1200")
+        dpi = 1200
+
+    # Validate corner_size_ratio
+    if not 0 < corner_size_ratio <= 0.5:
+        logger.warning(f"corner_size_ratio {corner_size_ratio} outside valid range, using default 0.2")
+        corner_size_ratio = 0.2
+
     try:
         pdf_document = fitz.open(pdf_path)
         total_pages = len(pdf_document)
@@ -689,8 +720,15 @@ def main():
                 val = float(arg)
                 if val > 10:  # Likely DPI
                     dpi = int(val)
+                    # Validate DPI range
+                    if dpi < 72 or dpi > 1200:
+                        print(f"Warning: DPI {dpi} outside recommended range (72-1200)")
                 elif val < 1:  # Likely corner ratio
                     corner_size_ratio = val
+                    # Validate corner ratio
+                    if corner_size_ratio <= 0 or corner_size_ratio > 0.5:
+                        print(f"Error: corner_size_ratio must be between 0 and 0.5, got {corner_size_ratio}")
+                        sys.exit(1)
                 else:
                     print(f"Warning: Unclear argument {arg}, ignoring")
             except ValueError:
