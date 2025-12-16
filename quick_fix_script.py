@@ -33,7 +33,7 @@ def quick_fix():
             stderr=subprocess.DEVNULL
         )
         print("✓ setuptools installed")
-    except:
+    except Exception:
         print("⚠ Could not install setuptools automatically")
         print("  Run manually: pip install setuptools")
     

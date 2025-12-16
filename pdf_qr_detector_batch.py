@@ -7,6 +7,7 @@ Generates individual reports and a consolidated summary.
 
 import sys
 import os
+import logging
 import fitz  # PyMuPDF
 import cv2
 import numpy as np
@@ -17,6 +18,9 @@ import csv
 from datetime import datetime
 import argparse
 import time
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Try to import detection libraries
 try:
@@ -79,7 +83,7 @@ def detect_datamatrix_with_pylibdmtx(gray_roi, decode=True, timeout=1000):
             if decode:
                 try:
                     decoded_data = code.data.decode('utf-8')
-                except:
+                except (UnicodeDecodeError, AttributeError):
                     decoded_data = str(code.data)
             else:
                 decoded_data = "DATAMATRIX_DETECTED"
@@ -90,8 +94,8 @@ def detect_datamatrix_with_pylibdmtx(gray_roi, decode=True, timeout=1000):
                 'position': (x, y, w, h),
                 'method': 'pylibdmtx'
             })
-    except:
-        pass
+    except Exception as e:
+        logger.debug(f"pylibdmtx detection failed: {e}")
     return detected
 
 def detect_codes_with_pyzbar(gray_roi, decode=True):
@@ -107,7 +111,7 @@ def detect_codes_with_pyzbar(gray_roi, decode=True):
             if decode:
                 try:
                     decoded_data = code.data.decode('utf-8')
-                except:
+                except (UnicodeDecodeError, AttributeError):
                     decoded_data = str(code.data)
             else:
                 decoded_data = f"{code.type}_DETECTED"
@@ -118,13 +122,23 @@ def detect_codes_with_pyzbar(gray_roi, decode=True):
                 'position': (x, y, w, h),
                 'method': 'pyzbar'
             })
-    except:
-        pass
+    except Exception as e:
+        logger.debug(f"pyzbar detection failed: {e}")
     return detected
 
 def detect_codes_in_corner(image, corner_size_ratio=0.2, decode=True):
     """Detect codes in top-right corner."""
     detected_codes = []
+
+    # Validate image input
+    if image is None or not hasattr(image, 'shape') or len(image.shape) < 2:
+        logger.warning("Invalid image input")
+        return detected_codes
+
+    # Validate corner_size_ratio
+    if not 0 < corner_size_ratio <= 0.5:
+        corner_size_ratio = 0.2
+
     h, w = image.shape[:2] if len(image.shape) == 3 else image.shape
     
     corner_width = int(w * corner_size_ratio)

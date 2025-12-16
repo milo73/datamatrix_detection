@@ -109,9 +109,17 @@ _decode_cache = DecodingCache(max_size=100)
 def _compute_image_hash(pixels: bytes, width: int, height: int) -> str:
     """Compute fast hash of image for caching"""
     # Use first/last bytes and dimensions for speed
-    sample_size = min(1000, len(pixels))
-    sample = pixels[:sample_size] + pixels[-sample_size:] if len(pixels) > sample_size else pixels
-    hash_input = sample + f"{width}x{height}".encode()
+    # Include total length to avoid collisions between similar small images
+    pixel_len = len(pixels)
+    sample_size = min(1000, pixel_len)
+
+    if pixel_len > sample_size * 2:
+        sample = pixels[:sample_size] + pixels[-sample_size:]
+    else:
+        sample = pixels
+
+    # Include dimensions AND total byte count to avoid collisions
+    hash_input = sample + f"{width}x{height}x{pixel_len}".encode()
     return hashlib.md5(hash_input).hexdigest()
 
 
@@ -158,40 +166,46 @@ def _load_image_efficient(image: Union[Any, Tuple[bytes, int, int]]) -> Tuple[by
     return pixels, width, height, bpp
 
 
-def _extract_roi(pixels: bytes, width: int, height: int, 
-                 x: int, y: int, roi_w: int, roi_h: int, 
+def _extract_roi(pixels: bytes, width: int, height: int,
+                 x: int, y: int, roi_w: int, roi_h: int,
                  bpp: int) -> Tuple[bytes, int, int]:
     """
     Extract Region of Interest from image.
-    
+
     Args:
         pixels: Full image pixel data
         width, height: Full image dimensions
         x, y: ROI top-left corner
         roi_w, roi_h: ROI dimensions
         bpp: Bits per pixel (8, 24, or 32)
-    
+
     Returns:
         (roi_pixels, roi_width, roi_height)
+
+    Raises:
+        ValueError: If ROI dimensions are invalid after clamping
     """
     bytes_per_pixel = bpp // 8
-    
+
     # Clamp ROI to image bounds
     x = max(0, min(x, width - 1))
     y = max(0, min(y, height - 1))
     roi_w = min(roi_w, width - x)
     roi_h = min(roi_h, height - y)
-    
+
+    # Ensure ROI has valid dimensions
+    if roi_w <= 0 or roi_h <= 0:
+        raise ValueError(f"Invalid ROI dimensions after clamping: {roi_w}x{roi_h}")
+
     # Extract ROI row by row
     roi_pixels = bytearray()
-    row_stride = width * bytes_per_pixel
     roi_stride = roi_w * bytes_per_pixel
-    
+
     for row in range(roi_h):
         src_row = y + row
         src_offset = (src_row * width + x) * bytes_per_pixel
         roi_pixels.extend(pixels[src_offset:src_offset + roi_stride])
-    
+
     return bytes(roi_pixels), roi_w, roi_h
 
 

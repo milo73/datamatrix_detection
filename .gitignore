@@ -1,1 +1,6 @@
 /OPGROEN_LEVEL_2_20251215_010OFFOP2S3ARE2_01_C5.pdf
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo

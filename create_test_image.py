@@ -115,7 +115,7 @@ def create_document_corner_test():
         try:
             font_large = ImageFont.truetype("arial.ttf", 40)
             font_normal = ImageFont.truetype("arial.ttf", 20)
-        except:
+        except (IOError, OSError):
             font_large = ImageFont.load_default()
             font_normal = ImageFont.load_default()
         
