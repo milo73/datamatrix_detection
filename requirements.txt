@@ -1,0 +1,10 @@
+# Core detection libraries
+pylibdmtx>=0.1.10
+pyzbar>=0.1.9
+PyMuPDF>=1.20.0
+opencv-python>=4.5.0
+numpy>=1.19.0
+
+# Web interface
+streamlit>=1.28.0
+pandas>=1.5.0
