@@ -111,7 +111,23 @@ pip install PyMuPDF opencv-python
 
 ## 🚀 Quick Start
 
-### Basic Usage
+### Option 1: Web Interface (Recommended for Desktop Use)
+
+```bash
+# Run the web interface
+streamlit run app_web.py
+
+# Opens automatically in browser at http://localhost:8501
+# Features:
+# - Drag and drop PDF files
+# - Interactive results table
+# - Configurable settings (DPI, corner ratio, modes)
+# - Download reports (JSON, CSV, TXT)
+# - View decoded values easily
+```
+
+### Option 2: Command Line Interface
+
 ```bash
 # Analyze a PDF with default settings
 python detector.py document.pdf
@@ -124,6 +140,7 @@ python detector.py document.pdf --skip-white
 ```
 
 ### For Problem PDFs
+
 ```bash
 # Maximum detection capability
 python detector.py document.pdf 500 0.15 --skip-white --debug
@@ -505,6 +522,7 @@ done
 
 ```
 project/
+├── app_web.py                  # Streamlit web interface
 ├── detector.py                 # Main single-file detector
 ├── detector_batch.py           # Batch processing for multiple PDFs
 ├── decoder_optimized.py        # Performance-optimized decoder functions
@@ -512,8 +530,10 @@ project/
 ├── test_image_generator.py     # Create test images for benchmarking
 ├── fix_python313.py            # Python 3.13 compatibility fix
 ├── fix_quick.py                # Quick installation fix script
+├── requirements.txt            # Python dependencies
 ├── README.md                   # This file
 ├── BATCH_README.md             # Batch processing documentation
+├── CLAUDE.md                   # AI assistant project documentation
 ├── debug_corners/              # Created when using --extract-corners
 │   ├── page_377_corner_original.png
 │   ├── page_377_corner_enhanced.png
