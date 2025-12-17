@@ -566,6 +566,6 @@ For issues, questions, or suggestions:
 
 ---
 
-**Version**: 2.0.0  
-**Last Updated**: 2024  
+**Version**: 2.1.0  
+**Last Updated**: 2025  
 **Requirements**: Python 3.7+, pylibdmtx, pyzbar, PyMuPDF, OpenCV
