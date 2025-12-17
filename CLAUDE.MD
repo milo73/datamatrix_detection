@@ -301,8 +301,34 @@ start_y = h - corner_height
 - Solution: Use `--skip-white` flag
 
 **"Code detected but decode failed"**:
+
 - Image quality too low
 - Solution: Increase DPI (`400` or `500`)
+
+**"Password protected PDF" / "Encrypted PDF error"**:
+
+- PDF is password-protected or encrypted
+- Solution: Decrypt the PDF first using `qpdf --decrypt input.pdf output.pdf` or similar tools
+
+**"Permission denied" / "Cannot write output files"**:
+
+- Insufficient permissions for output directory
+- Solution: Check write permissions on current directory or specify output path with write access
+
+**"Out of memory" / "Memory error on large PDFs"**:
+
+- PDF file too large or high DPI setting
+- Solution: Reduce DPI (try 300 instead of 600), process fewer pages at once, or increase available RAM
+
+**"PDF page rendering failed"**:
+
+- Corrupted or non-standard PDF format
+- Solution: Try re-saving the PDF using Adobe Acrobat or `gs` (Ghostscript) to normalize the format
+
+**"No barcodes found but they're visible"**:
+
+- Code orientation issue or outside the search region
+- Solution: Check if codes are rotated, try full-page detection, or adjust `corner_ratio` to expand search area
 
 ## Output Formats
 
@@ -329,13 +355,39 @@ Page  377: ✗ NO CODE FOUND
 
 ## Git Workflow
 
-**Branch**: `claude/update-claude-md-Zemsb`
+**Main Branch**: `main`
 **Remote**: `origin`
 
-**For changes**:
-1. Develop on the designated branch
-2. Commit with descriptive messages
-3. Push with: `git push -u origin claude/update-claude-md-Zemsb`
+**Recommended Workflow**:
+
+1. **Create a feature branch**:
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   # or for Claude-assisted work:
+   git checkout -b claude/descriptive-task-name
+   ```
+
+2. **Make changes and commit**:
+
+   ```bash
+   git add .
+   git commit -m "Descriptive commit message"
+   ```
+
+3. **Push to remote**:
+
+   ```bash
+   git push -u origin feature/your-feature-name
+   ```
+
+4. **Create pull request**:
+
+   ```bash
+   gh pr create --title "Your PR title" --body "Description"
+   ```
+
+5. **Merge to main** after review and testing
 
 ## Testing Strategy
 
@@ -389,6 +441,13 @@ Use `integration_examples.py` for:
 
 ---
 
-**Last Updated**: 2025-12-16
-**Project Version**: 2.0.0
+**Last Updated**: 2025-12-17
+**Project Version**: Track version using git tags (e.g., `git describe --tags` or `git tag -l`)
 **Maintained by**: milo73
+
+To create a new version tag:
+
+```bash
+git tag -a v2.1.0 -m "Release version 2.1.0"
+git push origin v2.1.0
+```
