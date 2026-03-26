@@ -1,3 +1,6 @@
+# Python 3.12+ compatibility (provides distutils backport needed by pylibdmtx)
+setuptools>=68.0
+
 # Core detection libraries
 pylibdmtx>=0.1.10
 pyzbar>=0.1.9
