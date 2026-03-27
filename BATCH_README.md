@@ -43,6 +43,9 @@ python detector_batch.py . --recursive
 
 ### Python Libraries
 ```bash
+# On Python 3.12+, install setuptools first for distutils compatibility
+pip install setuptools
+
 pip install pylibdmtx pyzbar PyMuPDF opencv-python numpy
 ```
 
@@ -281,18 +284,18 @@ import json
 from pathlib import Path
 
 # Step 1: Quick detection
-subprocess.run(['python', 'batch_detector.py', '.', '--detect-only'])
+subprocess.run(['python', 'detector_batch.py', '.', '--detect-only'])
 
 # Step 2: Load results
 with open('qr_detection_results/batch_results_*.json') as f:
     results = json.load(f)
 
 # Step 3: Reprocess files with missing codes
-problem_files = [r['filename'] for r in results['details'] 
+problem_files = [r['filename'] for r in results['details']
                  if r['pages_without_codes']]
 
 for pdf in problem_files:
-    subprocess.run(['python', 'batch_detector.py', pdf, 
+    subprocess.run(['python', 'detector_batch.py', pdf,
                    '--dpi', '500', '--skip-white'])
 ```
 
@@ -398,6 +401,6 @@ fi
 
 ---
 
-**Version**: 1.0.0  
-**Supports**: Python 3.7+  
+**Version**: 2.2.0
+**Supports**: Python 3.7+ (including 3.12 and 3.13; run `pip install setuptools` first on 3.12+)
 **Libraries**: pylibdmtx, pyzbar, PyMuPDF, OpenCV

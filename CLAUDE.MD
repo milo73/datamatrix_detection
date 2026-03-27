@@ -24,11 +24,15 @@ This is a **PDF QR Code & DataMatrix Detector** - a Python-based tool for detect
 **Purpose**: Process a single PDF file for QR/DataMatrix codes
 
 **Key Functions**:
+- `extract_page_as_image()`: Converts PDF page to image at configurable DPI
 - `is_white_page()`: Detects blank pages to skip
-- `detect_codes_in_top_right_corner()`: Main detection logic
-- `preprocess_for_detection()`: Image enhancement pipeline
-- `check_page_for_code()`: Per-page processing
-- `analyze_pdf()`: Main entry point
+- `detect_codes_in_top_right_corner()`: Main detection logic with preprocessing pipeline
+- `detect_datamatrix_with_pylibdmtx()`: DataMatrix-specific detection (primary)
+- `detect_codes_with_pyzbar()`: QR/DataMatrix detection (fallback)
+- `detect_codes_with_fallback()`: Full-page fallback if corner detection misses
+- `validate_code_content()`: Validates decoded values (8-digit numbers, URLs, etc.)
+- `analyze_pdf_for_codes()`: Main entry point for PDF analysis
+- `extract_and_save_corners()`: Debug feature to save corner images
 
 **Detection Pipeline**:
 1. PDF page → Image (configurable DPI)
@@ -189,17 +193,17 @@ python detector_batch.py test_pdfs/ --detect-only
 
 ### When Adding New Preprocessing
 
-**Location**: `detector.py` - `preprocess_for_detection()`
+**Location**: `detector.py` - `detect_codes_in_top_right_corner()`
 
-**Pattern**:
+Preprocessing is applied inline within this function. The 8 methods are defined as a list of `(name, image)` tuples:
 ```python
-def preprocess_for_detection(img):
-    methods = {}
-
-    # Add new method
-    methods['my_new_method'] = my_preprocessing_function(img)
-
-    return methods
+methods = [
+    ('original', gray_corner),
+    ('inverted', cv2.bitwise_not(gray_corner)),
+    ('binary', cv2.threshold(gray_corner, 127, 255, cv2.THRESH_BINARY)[1]),
+    # ... add new methods to this list
+    ('my_new_method', my_preprocessing_function(gray_corner)),
+]
 ```
 
 ### When Changing Corner Location
@@ -245,8 +249,8 @@ start_y = h - corner_height
 
 ### Version Compatibility
 
-**Python**: 3.7, 3.8, 3.9, 3.10, 3.11, 3.12
-**Python 3.13**: Use `fix_python313.py` for compatibility fixes
+**Python**: 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 3.13
+**Python 3.12+**: The `distutils` module was removed from the standard library. Install `setuptools` first (`pip install setuptools`) or run `fix_quick.py`. All project source code is natively compatible with Python 3.13; only the `pylibdmtx` dependency needs this workaround.
 
 ## Performance Characteristics
 
@@ -441,7 +445,7 @@ Use `integration_examples.py` for:
 
 ---
 
-**Last Updated**: 2025-12-17
+**Last Updated**: 2026-03-26
 **Project Version**: Track version using git tags (e.g., `git describe --tags` or `git tag -l`)
 **Maintained by**: milo73
 

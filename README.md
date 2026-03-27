@@ -15,6 +15,7 @@ A powerful Python script for detecting and decoding QR codes and DataMatrix code
 - [Troubleshooting](#troubleshooting)
 - [Common Issues & Solutions](#common-issues--solutions)
 - [Examples](#examples)
+- [Python 3.13 Compatibility](#python-313-compatibility)
 - [Technical Details](#technical-details)
 
 ## ✨ Features
@@ -33,7 +34,9 @@ A powerful Python script for detecting and decoding QR codes and DataMatrix code
 ## 📦 Requirements
 
 ### Python Version
-- Python 3.7, 3.8, 3.9, 3.10, 3.11
+- Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 3.13
+
+> **Python 3.13 Note**: Python 3.12+ removed the `distutils` module from the standard library, which affects `pylibdmtx`. Run `pip install setuptools` before installing other dependencies, or use the included `fix_quick.py` script. See [Python 3.13 Compatibility](#python-313-compatibility) for details.
 
 ### Python Libraries
 ```bash
@@ -114,6 +117,16 @@ pip install PyMuPDF opencv-python
 ### Option 1: Web Interface (Recommended for Desktop Use)
 
 ```bash
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate
+
+# Install setuptools which provides a distutils backport
+pip install setuptools
+
+# Then install other dependencies normally
+pip install -r requirements.txt
+
 # Run the web interface
 streamlit run app_web.py
 
@@ -129,6 +142,16 @@ streamlit run app_web.py
 ### Option 2: Command Line Interface
 
 ```bash
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate
+
+# Install setuptools which provides a distutils backport
+pip install setuptools
+
+# Then install other dependencies normally
+pip install -r requirements.txt
+
 # Analyze a PDF with default settings
 python detector.py document.pdf
 
@@ -543,6 +566,41 @@ project/
     └── document.pdf
 ```
 
+## Python 3.13 Compatibility
+
+Python 3.12 removed the `distutils` standard library module, which `pylibdmtx` depends on internally. This affects Python 3.12 and 3.13.
+
+### Quick Fix (Recommended)
+```bash
+# Install setuptools which provides a distutils backport
+pip install setuptools
+
+# Then install other dependencies normally
+pip install -r requirements.txt
+```
+
+### Automatic Fix
+```bash
+# Run the included fix script (installs setuptools + patches if needed)
+python fix_quick.py
+```
+
+### Manual Fix
+```bash
+# For more control, use the detailed fix script
+python fix_python313.py
+```
+
+### Verifying Compatibility
+```bash
+python -c "import pylibdmtx; print('pylibdmtx OK')"
+python -c "import pyzbar; print('pyzbar OK')"
+python -c "import fitz; print('PyMuPDF OK')"
+python -c "import cv2; print('OpenCV OK')"
+```
+
+> All project source code is fully compatible with Python 3.13. The only issue is the `pylibdmtx` dependency's use of `distutils`, which is resolved by installing `setuptools`.
+
 ## 📄 License
 
 This script is provided as-is for document processing and quality control purposes.
@@ -566,6 +624,6 @@ For issues, questions, or suggestions:
 
 ---
 
-**Version**: 2.1.0  
-**Last Updated**: 2025  
-**Requirements**: Python 3.7+, pylibdmtx, pyzbar, PyMuPDF, OpenCV
+**Version**: 2.2.0
+**Last Updated**: 2026
+**Requirements**: Python 3.7+ (including 3.12 and 3.13), pylibdmtx, pyzbar, PyMuPDF, OpenCV
