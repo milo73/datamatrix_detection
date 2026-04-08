@@ -193,16 +193,13 @@ if uploaded_files:
                 # Show decoded values in a highlighted section
                 if results['code_values']:
                     st.markdown("### 🔢 Decoded Values")
-                    decoded_col1, decoded_col2 = st.columns([1, 3])
-                    with decoded_col1:
-                        st.write("**Pages with codes:**")
-                        for page in sorted(results['code_values'].keys()):
-                            st.write(f"Page {page}")
-                    with decoded_col2:
-                        st.write("**Decoded values:**")
-                        for page in sorted(results['code_values'].keys()):
-                            value = results['code_values'][page]
-                            st.code(value, language=None)
+                    decoded_df = pd.DataFrame(
+                        [
+                            {"Page": f"Page {page}", "Decoded value": results['code_values'][page]}
+                            for page in sorted(results['code_values'].keys())
+                        ]
+                    )
+                    st.dataframe(decoded_df, use_container_width=True, hide_index=True)
 
                 # Download buttons
                 st.markdown("### 📥 Download Reports")
