@@ -152,7 +152,7 @@ pip install setuptools
 pip install -r requirements.txt
 
 # Run the web interface
-streamlit run app_web.py
+python -m streamlit run app_web.py
 
 # Opens automatically in browser at http://localhost:8501
 # Features:

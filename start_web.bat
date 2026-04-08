@@ -130,4 +130,4 @@ echo   The browser will open automatically.
 echo   Press Ctrl+C in this window to stop.
 echo ============================================
 echo.
-streamlit run app_web.py
+python -m streamlit run app_web.py
