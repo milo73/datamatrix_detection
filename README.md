@@ -93,22 +93,46 @@ pip install PyMuPDF opencv-python
 
 **Windows Troubleshooting**:
 
-1. **If pylibdmtx fails to import**:
+1. **"Access Denied" / "Toegang geweigerd" when running pip**:
+
+   This happens when Python is installed in a system-protected folder (e.g. `C:\Program Files\`).
+
+   **Option A — Use a virtual environment (recommended):**
+   ```cmd
+   python -m venv venv
+   venv\Scripts\activate
+   python -m pip install -r requirements.txt
+   ```
+
+   **Option B — Install for the current user only (no admin needed):**
+   ```cmd
+   python -m pip install --user -r requirements.txt
+   ```
+
+   **Option C — Run Command Prompt as Administrator:**
+   Right-click Command Prompt → *Run as administrator*, then retry.
+
+   **Option D — Reinstall Python for current user only:**
+   Re-run the Python installer and select **"Install for current user"** (not "All users").
+
+   > The `start_web.bat` script handles this automatically by creating a virtual environment and falling back to `--user` install if needed.
+
+2. **If pylibdmtx fails to import**:
    - The pip package includes pre-built DLLs for Windows
    - If you get "DLL not found" errors, install Visual C++ Redistributable:
      - [Visual C++ 2015-2022 Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
-2. **If pyzbar fails to import**:
+3. **If pyzbar fails to import**:
    - pyzbar requires `libzbar-64.dll` which is bundled with the pip package
    - If missing, install Visual C++ 2013 Redistributable:
      - [Visual C++ 2013 Redistributable](https://aka.ms/highdpimfc2013x64enu)
 
-3. **For 32-bit Python on Windows**:
+4. **For 32-bit Python on Windows**:
    ```cmd
    pip install pylibdmtx[win32]
    ```
 
-4. **Manual DLL installation** (if automatic fails):
+5. **Manual DLL installation** (if automatic fails):
    - Download `libdmtx.dll` from [libdmtx releases](https://github.com/dmtx/libdmtx/releases)
    - Place in your Python's `Scripts` folder or add to system PATH
 

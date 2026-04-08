@@ -69,11 +69,19 @@ brew install libdmtx zbar
 
 #### Windows
 ```cmd
-# pip includes pre-built Windows binaries
-pip install pylibdmtx pyzbar PyMuPDF opencv-python numpy
+:: Use a virtual environment to avoid permission issues
+python -m venv venv
+venv\Scripts\activate
+python -m pip install -r requirements.txt
 ```
 
 **Windows Notes**:
+- **"Access Denied" / "Toegang geweigerd"**: Python is likely installed in a system folder.
+  Use a virtual environment (above), or add `--user` to install without admin rights:
+  ```cmd
+  python -m pip install --user pylibdmtx pyzbar PyMuPDF opencv-python numpy
+  ```
+  Alternatively, run Command Prompt as Administrator.
 - If you get DLL errors, install [Visual C++ 2015-2022 Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 - For pyzbar DLL issues, install [Visual C++ 2013 Redistributable](https://aka.ms/highdpimfc2013x64enu)
 - Alternative: Use Anaconda: `conda install -c conda-forge pylibdmtx pyzbar`
