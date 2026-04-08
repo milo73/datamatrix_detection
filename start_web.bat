@@ -38,12 +38,24 @@ echo [OK]   Virtual environment activated.
 :: Install/check dependencies
 echo.
 echo Checking dependencies...
-pip install -q -r requirements.txt >nul 2>&1
+python -m pip install -q -r requirements.txt >nul 2>&1
 if errorlevel 1 (
-    echo [FAIL] Could not install dependencies from requirements.txt.
-    echo        Try running: pip install -r requirements.txt
-    pause
-    exit /b 1
+    echo [WARN] Normal install failed. Trying --user install...
+    python -m pip install -q --user -r requirements.txt >nul 2>&1
+    if errorlevel 1 (
+        echo [FAIL] Could not install dependencies from requirements.txt.
+        echo.
+        echo        Common causes of "Access Denied" / "Toegang geweigerd":
+        echo        - Python is installed in a protected system folder
+        echo        - You need admin rights for a system-wide install
+        echo.
+        echo        Solutions:
+        echo        1. Run this batch file as Administrator (right-click ^> Run as administrator)
+        echo        2. Reinstall Python and tick "Install for current user only"
+        echo        3. Run manually: python -m pip install --user -r requirements.txt
+        pause
+        exit /b 1
+    )
 )
 echo [OK]   All dependencies installed.
 
@@ -118,4 +130,4 @@ echo   The browser will open automatically.
 echo   Press Ctrl+C in this window to stop.
 echo ============================================
 echo.
-streamlit run app_web.py
+python -m streamlit run app_web.py
