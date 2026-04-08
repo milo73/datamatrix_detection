@@ -1,6 +1,40 @@
-/OPGROEN_LEVEL_2_20251215_010OFFOP2S3ARE2_01_C5.pdf
+# PDF test files
+*.pdf
 
 # Python cache
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+*.pyw
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Debug output
+debug_corners/
+qr_detection_results/
+*.log
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

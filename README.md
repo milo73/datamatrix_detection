@@ -572,21 +572,19 @@ project/
 ├── app_web.py                  # Streamlit web interface
 ├── detector.py                 # Main single-file detector
 ├── detector_batch.py           # Batch processing for multiple PDFs
-├── decoder_optimized.py        # Performance-optimized decoder functions
-├── integration_examples.py     # Integration examples and benchmarks
-├── test_image_generator.py     # Create test images for benchmarking
 ├── fix_python313.py            # Python 3.13 compatibility fix
 ├── fix_quick.py                # Quick installation fix script
 ├── requirements.txt            # Python dependencies
+├── start_web.bat               # Windows one-click launcher
+├── quick_setup.sh              # macOS/Linux setup script
 ├── README.md                   # This file
 ├── BATCH_README.md             # Batch processing documentation
-├── CLAUDE.md                   # AI assistant project documentation
 ├── debug_corners/              # Created when using --extract-corners
 │   ├── page_377_corner_original.png
 │   ├── page_377_corner_enhanced.png
 │   ├── page_377_corner_binary.png
 │   └── page_377_corner_inverted.png
-└── test_pdfs/                  # Your PDF files
+└── your_pdfs/                  # Your PDF files
     └── document.pdf
 ```
 
