@@ -117,6 +117,16 @@ pip install PyMuPDF opencv-python
 ### Option 1: Web Interface (Recommended for Desktop Use)
 
 ```bash
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate
+
+# Install setuptools which provides a distutils backport
+pip install setuptools
+
+# Then install other dependencies normally
+pip install -r requirements.txt
+
 # Run the web interface
 streamlit run app_web.py
 
@@ -132,6 +142,16 @@ streamlit run app_web.py
 ### Option 2: Command Line Interface
 
 ```bash
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate
+
+# Install setuptools which provides a distutils backport
+pip install setuptools
+
+# Then install other dependencies normally
+pip install -r requirements.txt
+
 # Analyze a PDF with default settings
 python detector.py document.pdf
 
