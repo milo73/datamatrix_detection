@@ -14,6 +14,12 @@ venv/
 env/
 .env/
 
+# Embedded Python bootstrap (start_web.ps1)
+python-embed/
+python-*-embed-*.zip
+offline/*.zip
+offline/get-pip.py
+
 # Distribution / packaging
 dist/
 build/
