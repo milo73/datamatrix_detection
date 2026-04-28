@@ -63,6 +63,18 @@ function Write-Info { param([string]$M) Write-Host "[INFO] $M" -ForegroundColor 
 function Write-Warn { param([string]$M) Write-Host "[WARN] $M" -ForegroundColor Yellow }
 function Write-Fail { param([string]$M) Write-Host "[FAIL] $M" -ForegroundColor Red }
 
+# Pip and other native tools write benign warnings to stderr (e.g. "script
+# X is installed in '...' which is not on PATH"). With $ErrorActionPreference
+# set to 'Stop', Windows PowerShell 5.1 promotes those into terminating
+# NativeCommandError records even when the exit code is 0. Localize the
+# preference around native calls and judge success purely by $LASTEXITCODE.
+function Invoke-WithNativeErrorTolerance {
+    param([Parameter(Mandatory)][scriptblock]$ScriptBlock)
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try { & $ScriptBlock } finally { $ErrorActionPreference = $prev }
+}
+
 function Stop-WithError {
     param([string]$Message, [int]$Code = 1)
     Write-Fail $Message
@@ -241,7 +253,9 @@ For offline machines: place get-pip.py in $OfflineDir\ and re-run.
     }
 
     Write-Info 'Installing pip into embedded Python'
-    & $pythonExe $getPipPath --no-warn-script-location
+    Invoke-WithNativeErrorTolerance {
+        & $pythonExe $getPipPath --no-warn-script-location
+    }
     if ($LASTEXITCODE -ne 0) {
         Stop-WithError 'pip bootstrap failed - see output above'
     }
@@ -257,15 +271,21 @@ function Install-Requirements {
     Write-Header 'Installing project dependencies'
 
     $logPath = Join-Path $PSScriptRoot 'pip_install.log'
-    & $Python -m pip install --upgrade pip setuptools --disable-pip-version-check 2>&1 |
-        Tee-Object -FilePath $logPath
+    if (Test-Path -LiteralPath $logPath) { Remove-Item -LiteralPath $logPath -Force }
+
+    Invoke-WithNativeErrorTolerance {
+        & $Python -m pip install --upgrade pip setuptools --disable-pip-version-check 2>&1 |
+            Tee-Object -FilePath $logPath -Append
+    }
     if ($LASTEXITCODE -ne 0) {
         Stop-WithError "Failed to upgrade pip/setuptools - see $logPath"
     }
 
-    & $Python -m pip install -r (Join-Path $PSScriptRoot $RequirementsTxt) `
-        --disable-pip-version-check 2>&1 |
-        Tee-Object -FilePath $logPath -Append
+    $reqPath = Join-Path $PSScriptRoot $RequirementsTxt
+    Invoke-WithNativeErrorTolerance {
+        & $Python -m pip install -r $reqPath --disable-pip-version-check 2>&1 |
+            Tee-Object -FilePath $logPath -Append
+    }
     if ($LASTEXITCODE -ne 0) {
         Stop-WithError @"
 pip install failed for requirements.txt - see $logPath
@@ -347,8 +367,10 @@ try {
         }
     }
 
-    $version = & $python --version 2>&1
-    Write-Ok "$version"
+    Invoke-WithNativeErrorTolerance {
+        $version = & $python --version 2>&1
+        Write-Ok "$version"
+    }
 
     Install-Requirements -Python $python
     Test-CriticalImports -Python $python
@@ -362,7 +384,12 @@ try {
     Write-Host '  Press Ctrl+C in this window to stop the server.'
     Write-Host ''
 
-    & $python -m streamlit run (Join-Path $PSScriptRoot $AppEntryPoint)
+    # Streamlit writes startup banner and ongoing logs to stderr. Without
+    # this wrapper the first stderr line would terminate the launcher.
+    $appPath = Join-Path $PSScriptRoot $AppEntryPoint
+    Invoke-WithNativeErrorTolerance {
+        & $python -m streamlit run $appPath
+    }
     exit $LASTEXITCODE
 }
 finally {
