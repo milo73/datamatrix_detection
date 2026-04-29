@@ -92,7 +92,7 @@ Drop PDFs into the `./data/` folder on the host, then:
 docker compose exec app python detector_batch.py /data/<your-folder>
 ```
 
-The reports (`*_results.csv`, `*_results.json`) are written next to the PDFs and are visible from the host filesystem.
+Reports are written to `data/<your-folder>/qr_detection_results/` — a per-file `<pdf>_analysis.json`, plus consolidated `batch_summary_<timestamp>.csv`, `batch_results_<timestamp>.json`, and `missing_codes_report_<timestamp>.txt`. All visible from the host filesystem.
 
 **Lifecycle:**
 
