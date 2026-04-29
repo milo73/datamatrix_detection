@@ -24,6 +24,8 @@ start_web.bat
 
 > **Tip**: If you see "Access Denied" / "Toegang geweigerd", right-click `start_web.bat` and choose **Run as administrator**. The script also tries a `--user` install automatically as a fallback.
 
+> **Locked-down Windows (no admin, no Python installed)**: double-click **`start_web.cmd`** instead. It runs `start_web.ps1`, which downloads a per-user Python and installs everything inside the project folder — no admin, no installer. See [Locked-down Windows](#locked-down-windows-no-admin-no-python) below.
+
 ---
 
 ### macOS / Linux
@@ -106,6 +108,38 @@ If pip gives "Access Denied" / "Toegang geweigerd":
 If you get **DLL errors** after install:
 - [Visual C++ 2015-2022 Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe) — fixes most `pylibdmtx` / `pyzbar` DLL issues
 - [Visual C++ 2013 Redistributable](https://aka.ms/highdpimfc2013x64enu) — fixes `libzbar-64.dll` missing errors
+
+### Locked-down Windows (no admin, no Python)
+
+If you don't have admin rights and Python isn't installed, use **`start_web.cmd`** (a thin wrapper around `start_web.ps1`). It bootstraps a per-user Python without any installer.
+
+```cmd
+:: Double-click start_web.cmd, or from a PowerShell window:
+powershell -NoProfile -ExecutionPolicy Bypass -File .\start_web.ps1
+```
+
+What it does on first run (~30 seconds):
+1. Downloads the [Python 3.11 embeddable distribution](https://www.python.org/ftp/python/3.11.9/) (~10 MB) into `python-embed\`
+2. Bootstraps `pip` inside that folder
+3. Installs the project's requirements there
+4. Opens the web UI at `http://localhost:8501`
+
+Subsequent runs skip the download and start instantly. Nothing is written outside the project folder; the system PATH and registry are not modified.
+
+**Air-gapped / network-restricted machines**: drop these two files into an `offline\` folder next to `start_web.ps1`, then re-run — no network access will be attempted:
+
+| File | Source |
+|------|--------|
+| `python-3.11.9-embed-amd64.zip` | <https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip> |
+| `get-pip.py` | <https://bootstrap.pypa.io/get-pip.py> |
+
+**If `pylibdmtx` or `pyzbar` fail to import** after install, the embedded Python is fine but the **Visual C++ Redistributable** is missing (a system-wide DLL pylibdmtx/pyzbar wheels load at runtime). Per-user installation of the redist is sometimes possible without admin (`vc_redist.x64.exe /install /passive /norestart`); otherwise ask IT to deploy it. Links are in the previous section.
+
+**To force a clean reinstall** of the embedded Python:
+
+```cmd
+powershell -NoProfile -ExecutionPolicy Bypass -File .\start_web.ps1 -Reinstall
+```
 
 ### macOS
 
@@ -341,6 +375,8 @@ project/
 ├── fix_python313.py     # Detailed Python 3.13 fix script
 ├── requirements.txt     # Python dependencies
 ├── start_web.bat        # Windows one-click launcher
+├── start_web.cmd        # Windows locked-down launcher (calls start_web.ps1)
+├── start_web.ps1        # Bootstraps per-user Python, no admin needed
 ├── quick_setup.sh       # macOS/Linux setup script
 ├── README.md            # This file
 ├── BATCH_README.md      # Batch processing reference
