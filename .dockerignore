@@ -1,0 +1,15 @@
+.git
+.gitignore
+__pycache__
+*.pyc
+venv
+.venv
+*.pdf
+docs
+debug_corners
+qr_detection_results
+*.log
+.DS_Store
+start_web.bat
+start_web.cmd
+start_web.ps1
