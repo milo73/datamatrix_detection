@@ -44,3 +44,7 @@ qr_detection_results/
 # OS
 .DS_Store
 Thumbs.db
+
+# Docker bind-mount data (keep .gitkeep)
+data/*
+!data/.gitkeep
