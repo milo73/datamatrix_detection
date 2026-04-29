@@ -48,6 +48,65 @@ bash quick_setup.sh
 
 ---
 
+### Azure VM (RHEL 9) — Docker
+
+Deploy on an Azure VM running RHEL 9.7 (or compatible). Assumes the VM already has Docker Engine and the Compose plugin installed and running.
+
+**Fast path:**
+
+```bash
+git clone https://github.com/milo73/datamatrix_detection.git
+cd datamatrix_detection
+bash scripts/install-rhel.sh
+```
+
+The script verifies Docker is available, builds the image, starts the container with auto-restart on reboot, and prints the URL.
+
+**Manual steps (if you'd rather see what's happening):**
+
+```bash
+git clone https://github.com/milo73/datamatrix_detection.git
+cd datamatrix_detection
+docker compose up -d --build
+docker compose ps
+```
+
+**Open the port** (the script does NOT do this for you):
+
+```bash
+# 1. firewalld on the VM
+sudo firewall-cmd --add-port=8501/tcp --permanent
+sudo firewall-cmd --reload
+
+# 2. Azure NSG: inbound rule, source = your IP, destination port = 8501/tcp
+#    (do this in the Azure portal, or with `az network nsg rule create`)
+```
+
+Then open `http://<vm-public-ip>:8501` in a browser.
+
+**Batch CLI on the VM:**
+
+Drop PDFs into the `./data/` folder on the host, then:
+
+```bash
+docker compose exec app python detector_batch.py /data/<your-folder>
+```
+
+The reports (`*_results.csv`, `*_results.json`) are written next to the PDFs and are visible from the host filesystem.
+
+**Lifecycle:**
+
+```bash
+docker compose logs -f         # follow logs
+docker compose restart         # restart container
+docker compose down            # stop and remove
+docker compose up -d --build   # rebuild after pulling new code
+```
+
+**Security note:** This deployment is HTTP-only with no authentication. It is intended for trusted networks. Restrict the Azure NSG inbound rule to known source IPs; do not leave port 8501 open to `0.0.0.0/0` long-term.
+
+---
+
 ### Command Line (all platforms)
 
 ```bash
