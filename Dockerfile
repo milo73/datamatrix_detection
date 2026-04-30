@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.12-slim-bookworm
 
 # System libs:
 #   libdmtx0b     -> required by pylibdmtx (DataMatrix decode)
